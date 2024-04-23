@@ -14,6 +14,9 @@ return {
 			"RRethy/vim-illuminate",
 			"hrsh7th/cmp-nvim-lsp",
 		},
+		opts = {
+			inlay_hints = { enabled = true }
+		},
 		config = function()
 			-- Set up Mason before anything else
 			require("mason").setup()
@@ -21,6 +24,7 @@ return {
 				ensure_installed = {
 					"lua_ls",
 					"pylsp",
+					"gopls",
 				},
 				automatic_installation = true,
 			})
@@ -35,7 +39,7 @@ return {
 			require("fidget").setup()
 
 			-- Set up cool signs for diagnostics
-			local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+			local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
 			for type, icon in pairs(signs) do
 				local hl = "DiagnosticSign" .. type
 				vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
@@ -91,6 +95,9 @@ return {
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
+			-- needed for gopls
+			local util = require "lspconfig/util"
+
 			-- Lua
 			require("lspconfig")["lua_ls"].setup({
 				on_attach = on_attach,
@@ -111,6 +118,47 @@ return {
 						},
 					},
 				},
+			})
+
+			-- Go
+			require("lspconfig")["gopls"].setup({
+				on_attach = on_attach,
+				capabilities = capabilities,
+				cmd = { "gopls" },
+				filetypes = { "go", "gomod", "gowork", "gotmpl" },
+				root_dir = util.root_pattern("go.work", "go.mod", ".git"),
+				settings = {
+					gopls = {
+						completeUnimported = true,
+						usePlaceholders = true,
+						analyses = {
+							unusedparams = true,
+						},
+					},
+				},
+			})
+
+			-- Rust
+			require("lspconfig")["rust_analyzer"].setup({
+				on_attach = on_attach,
+				settings = {
+					["rust-analyzer"] = {
+						imports = {
+							granularity = {
+								group = "module",
+							},
+							prefix = "self",
+						},
+						cargo = {
+							buildScripts = {
+								enable = true,
+							},
+						},
+						procMacro = {
+							enable = true,
+						},
+					}
+				}
 			})
 
 			-- Python
