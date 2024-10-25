@@ -1,4 +1,4 @@
 -- Themes
 return {
-	"Mofiqul/vscode.nvim",
+    "ellisonleao/gruvbox.nvim",
 }

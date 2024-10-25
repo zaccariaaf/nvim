@@ -23,8 +23,8 @@ return {
 			require("mason-lspconfig").setup({
 				ensure_installed = {
 					"lua_ls",
-					"pylsp",
-					"gopls",
+                    "rust_analyzer",
+                    "codelldb",
 				},
 				automatic_installation = true,
 			})
@@ -38,19 +38,9 @@ return {
 			-- Turn on LSP status information
 			require("fidget").setup()
 
-			-- Set up cool signs for diagnostics
-			local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
-			for type, icon in pairs(signs) do
-				local hl = "DiagnosticSign" .. type
-				vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
-			end
-
 			-- Diagnostic config
 			local config = {
 				virtual_text = false,
-				signs = {
-					active = signs,
-				},
 				update_in_insert = true,
 				underline = true,
 				severity_sort = true,
@@ -95,9 +85,6 @@ return {
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
-			-- needed for gopls
-			local util = require "lspconfig/util"
-
 			-- Lua
 			require("lspconfig")["lua_ls"].setup({
 				on_attach = on_attach,
@@ -119,77 +106,7 @@ return {
 					},
 				},
 			})
-
-			-- Go
-			require("lspconfig")["gopls"].setup({
-				on_attach = on_attach,
-				capabilities = capabilities,
-				cmd = { "gopls" },
-				filetypes = { "go", "gomod", "gowork", "gotmpl" },
-				root_dir = util.root_pattern("go.work", "go.mod", ".git"),
-				settings = {
-					gopls = {
-						completeUnimported = true,
-						usePlaceholders = true,
-						analyses = {
-							unusedparams = true,
-						},
-					},
-				},
-			})
-
-			-- Rust
-			require("lspconfig")["rust_analyzer"].setup({
-				on_attach = on_attach,
-				settings = {
-					["rust-analyzer"] = {
-						imports = {
-							granularity = {
-								group = "module",
-							},
-							prefix = "self",
-						},
-						cargo = {
-							buildScripts = {
-								enable = true,
-							},
-						},
-						procMacro = {
-							enable = true,
-						},
-					}
-				}
-			})
-
-			-- Python
-			require("lspconfig")["pylsp"].setup({
-				on_attach = on_attach,
-				capabilities = capabilities,
-				settings = {
-					pylsp = {
-						plugins = {
-							flake8 = {
-								enabled = true,
-								maxLineLength = 88, -- Black's line length
-							},
-							-- Disable plugins overlapping with flake8
-							pycodestyle = {
-								enabled = false,
-							},
-							mccabe = {
-								enabled = false,
-							},
-							pyflakes = {
-								enabled = false,
-							},
-							-- Use Black as the formatter
-							autopep8 = {
-								enabled = false,
-							},
-						},
-					},
-				},
-			})
 		end,
 	},
+    "mrcjkb/rustaceanvim",
 }
